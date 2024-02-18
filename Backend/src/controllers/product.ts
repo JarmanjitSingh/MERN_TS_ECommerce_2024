@@ -8,6 +8,8 @@ import {
 import { Product } from "../models/product.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
+import { myCache } from "../app.js";
+import { invalidateCache } from "../utils/features.js";
 
 export const newProduct = CatchAsyncErrors(
   async (
@@ -34,6 +36,8 @@ export const newProduct = CatchAsyncErrors(
       photo: photo?.path,
     });
 
+    await invalidateCache({ product: true });
+
     return res.status(201).json({
       success: true,
       message: "Product Created",
@@ -41,13 +45,21 @@ export const newProduct = CatchAsyncErrors(
   }
 );
 
+// Revalidate caching on New, Update, Delete product and on New Order
 export const getLatestProducts = CatchAsyncErrors(
   async (
     req: Request<{}, {}, NewProductRequestBody>,
     res: Response,
     next: NextFunction
   ) => {
-    const products = await Product.find({}).sort({ createdAt: -1 }).limit(5);
+    let products;
+
+    if (myCache.has("latest-product"))
+      products = JSON.parse(myCache.get("latest-product") as string);
+    else {
+      products = await Product.find({}).sort({ createdAt: -1 }).limit(5);
+      myCache.set("latest-product", JSON.stringify(products));
+    }
 
     return res.status(201).json({
       success: true,
@@ -56,9 +68,17 @@ export const getLatestProducts = CatchAsyncErrors(
   }
 );
 
+// Revalidate caching on New, Update, Delete product and on New Order
 export const getAllCategories = CatchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
-    const categories = await Product.distinct("category");
+    let categories;
+
+    if (myCache.has("categories"))
+      categories = JSON.parse(myCache.get("categories") as string);
+    else {
+      categories = await Product.distinct("category");
+      myCache.set("categories", JSON.stringify(categories));
+    }
 
     return res.status(200).json({
       success: true,
@@ -67,9 +87,16 @@ export const getAllCategories = CatchAsyncErrors(
   }
 );
 
+// Revalidate caching on New, Update, Delete product and on New Order
 export const getAdminProducts = CatchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
-    const products = await Product.find({});
+    let products;
+    if (myCache.has("all-products"))
+      products = JSON.parse(myCache.get("all-products") as string);
+    else {
+      products = await Product.find({});
+      myCache.set("all-products", JSON.stringify(products));
+    }
 
     return res.status(200).json({
       success: true,
@@ -82,7 +109,15 @@ export const getSingleProduct = CatchAsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     if (!id) return next(new ErrorHandler("Invalid Id", 400));
-    const product = await Product.findById(id);
+
+    let product;
+
+    if (myCache.has(`product-${id}`))
+      product = JSON.parse(myCache.get(`product-${id}`) as string);
+    else {
+      product = await Product.findById(id);
+      myCache.set(`product-${id}`, JSON.stringify(product));
+    }
 
     if (!product) return next(new ErrorHandler("Invalid Id", 400));
 
@@ -117,6 +152,8 @@ export const updateProduct = CatchAsyncErrors(
 
     await product.save();
 
+    await invalidateCache({ product: true });
+
     return res.status(200).json({
       success: true,
       message: "Product Updated",
@@ -137,6 +174,8 @@ export const deleteProduct = CatchAsyncErrors(
     });
 
     await product.deleteOne();
+
+    await invalidateCache({ product: true });
 
     return res.status(200).json({
       success: true,
