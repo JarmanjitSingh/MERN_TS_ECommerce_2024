@@ -2,6 +2,7 @@ import express from "express";
 import { adminOnly } from "../middlewares/auth.js";
 import {
   deleteProduct,
+  filterAllProducts,
   getAdminProducts,
   getAllCategories,
   getLatestProducts,
@@ -22,10 +23,13 @@ router.get("/categories", getAllCategories);
 
 router.get("/admin-products", adminOnly, getAdminProducts);
 
+router.get("/filter", filterAllProducts)
+
 router
   .route("/:id")
   .get(getSingleProduct)
   .put(adminOnly, singleUpload, updateProduct)
   .delete(adminOnly, deleteProduct);
+
 
 export default router;

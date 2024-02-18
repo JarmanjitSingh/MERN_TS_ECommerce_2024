@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { CatchAsyncErrors } from "../middlewares/error.js";
-import { NewProductRequestBody } from "../types/types.js";
+import {
+  BaseQueryType,
+  NewProductRequestBody,
+  SearchRequestQueryType,
+} from "../types/types.js";
 import { Product } from "../models/product.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
@@ -137,6 +141,59 @@ export const deleteProduct = CatchAsyncErrors(
     return res.status(200).json({
       success: true,
       message: "Product deleted successfully",
+    });
+  }
+);
+
+export const filterAllProducts = CatchAsyncErrors(
+  async (
+    req: Request<{}, {}, {}, SearchRequestQueryType>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { search, sort, category, price } = req.query;
+    const page = Number(req.query.page) || 1;
+
+    const limit = Number(process.env.PRODUCT_PER_PAGE) || 8;
+    const skip = (page - 1) * limit;
+
+    const baseQuery: BaseQueryType = {};
+
+    if (search)
+      baseQuery.name = {
+        $regex: search,
+        $options: "i",
+      };
+
+    if (price)
+      baseQuery.price = {
+        $lte: Number(price),
+      };
+
+    if (category) baseQuery.category = category;
+
+    const [products, filteredOnlyProducts] = await Promise.all([
+      Product.find(baseQuery)
+        .sort(sort ? { price: sort === "asc" ? 1 : -1 } : undefined)
+        .limit(limit)
+        .skip(skip),
+
+      Product.find(baseQuery),
+    ]);
+
+    // const products = await Product.find(baseQuery)
+    //   .sort(sort ? { price: sort === "asc" ? 1 : -1 } : undefined)
+    //   .limit(limit)
+    //   .skip(skip);
+
+    // const filteredOnlyProducts = await Product.find(baseQuery);
+
+    const totalPage = Math.ceil(filteredOnlyProducts.length / limit);
+
+    return res.status(200).json({
+      success: true,
+      products,
+      totalPage,
     });
   }
 );

@@ -14,11 +14,28 @@ export interface NewProductRequestBody {
   category: string;
   price: number;
   stock: number;
-  photo: string
+  photo: string;
 }
 
 export type catchAsyncErrorFunctionType = (
   req: Request,
   res: Response,
   next: NextFunction
-) => Promise<void |Response<any, Record<string, any>>>;
+) => Promise<void | Response<any, Record<string, any>>>;
+
+export type SearchRequestQueryType = {
+  search?: string;
+  price?: string;
+  category?: string;
+  sort?: string;
+  page?: string;
+};
+
+export type BaseQueryType = {
+  name?: {
+    $regex: string;
+    $options: string;
+  };
+  price?: { $lte: number };
+  category?: string;
+};
