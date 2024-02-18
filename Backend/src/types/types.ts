@@ -9,8 +9,16 @@ export interface NewUserRequestBody {
   dob: Date;
 }
 
+export interface NewProductRequestBody {
+  name: string;
+  category: string;
+  price: number;
+  stock: number;
+  photo: string
+}
+
 export type catchAsyncErrorFunctionType = (
-  req: Request<{}, {}, NewUserRequestBody>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => Promise<void |Response<any, Record<string, any>>>;
