@@ -1,11 +1,19 @@
 import express from "express";
 import userRoute from "./routes/user.js";
 import productRoute from "./routes/products.js";
+import orderRoute from "./routes/order.js";
 import { connectDB } from "./config/database.js";
 import { errorMiddleware } from "./middlewares/error.js";
 import NodeCache from "node-cache";
+import {config} from 'dotenv';
+import morgan from "morgan";
 
-const port = 4000;
+
+config({
+  path: "./.env"
+})
+
+const port = process.env.PORT || 4000;
 
 export const myCache = new NodeCache()
 
@@ -15,10 +23,12 @@ connectDB();
 //using middlewares
 app.use(express.json());
 app.use("/uploads",express.static("uploads"))
+app.use(morgan('dev'))
 
 // Imorting routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
+app.use("/api/v1/order", orderRoute);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the E-commerce Backend");
