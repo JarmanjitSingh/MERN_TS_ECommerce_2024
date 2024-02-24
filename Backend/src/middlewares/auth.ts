@@ -13,7 +13,7 @@ export const adminOnly = CatchAsyncErrors(
     if (!user) return next(new ErrorHandler("Invalid id", 400));
 
     if (user.role !== "admin")
-      return next(new ErrorHandler("You are not authorized as admin", 400));
+      return next(new ErrorHandler("You are not authorized as admin", 403));
 
     next();
   }
