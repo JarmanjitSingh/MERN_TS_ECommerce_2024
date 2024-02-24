@@ -38,7 +38,7 @@ export const newOrder = CatchAsyncErrors(
     });
 
     await reduceStock(orderItems);
-    await invalidateCache({
+    invalidateCache({
       product: true,
       order: true,
       admin: true,
