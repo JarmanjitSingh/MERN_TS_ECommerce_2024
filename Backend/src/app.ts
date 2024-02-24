@@ -9,13 +9,16 @@ import { errorMiddleware } from "./middlewares/error.js";
 import NodeCache from "node-cache";
 import { config } from "dotenv";
 import morgan from "morgan";
+import Stripe from "stripe";
 
 config({
   path: "./.env",
 });
 
 const port = process.env.PORT || 4000;
+const stripeKey = process.env.STRIPE_KEY || "";
 
+export const stripe = new Stripe(stripeKey);
 export const myCache = new NodeCache();
 
 const app = express();
