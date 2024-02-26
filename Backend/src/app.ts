@@ -10,6 +10,7 @@ import NodeCache from "node-cache";
 import { config } from "dotenv";
 import morgan from "morgan";
 import Stripe from "stripe";
+import cors from "cors";
 
 config({
   path: "./.env",
@@ -28,6 +29,7 @@ connectDB();
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 app.use(morgan("dev"));
+app.use(cors());
 
 // Imorting routes
 app.use("/api/v1/user", userRoute);

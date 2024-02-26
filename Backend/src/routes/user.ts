@@ -4,7 +4,7 @@ import { adminOnly } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// route -  /api/v1/new
+// route -  /api/v1/user/new
 router.route("/new").post(newUser)
 
 router.get("/all", getAllUsers)
