@@ -9,7 +9,7 @@ router.route("/new").post(newUser)
 
 router.get("/all", getAllUsers)
 
-router.get("/:id", adminOnly, getSingleUser)
+router.get("/:id", getSingleUser)
 router.delete("/:id", adminOnly, deleteUser)
 
 export default router;
