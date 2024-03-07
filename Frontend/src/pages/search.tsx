@@ -37,8 +37,8 @@ const Search = () => {
     price: maxPrice,
   });
 
-  const isNextPage = page < searchedData?.totalPage!;
-  const isPrevPage = page > searchedData?.totalPage!;
+  const isNextPage = page < 4;
+  const isPrevPage = page > 1;
 
   if (isError) {
     const err = error as CustomError;
